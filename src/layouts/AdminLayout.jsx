@@ -15,7 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const { Header, Sider, Content } = Layout;
 const { Text, Title } = Typography;
-import logo from '../assets/logo.png';
+import logo from '../assets/Logo.png';
 
 const AdminLayout = () => {
     const { logout } = useAuth();
