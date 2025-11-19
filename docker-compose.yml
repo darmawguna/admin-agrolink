@@ -1,7 +1,7 @@
 version: "3.8"
 # Testing Production 
 services:
-  agrolink-web:
+  agrolink-admin:
     image: darmawiguna/agrolink-admin:latest
     container_name: agrolink-admin
     restart: unless-stopped
