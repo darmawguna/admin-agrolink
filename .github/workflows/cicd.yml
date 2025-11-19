@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  IMAGE_NAME: agrolink-web
+  IMAGE_NAME: agrolink-admin
 
 jobs:
   build-and-push:
@@ -64,7 +64,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            cd /home/ubuntu/AgroLink_Website
+            cd /home/ubuntu/admin-agrolink
 
             # Pastikan docker & compose tersedia (opsional)
             docker --version

@@ -2,8 +2,8 @@ version: "3.8"
 # Testing Production 
 services:
   agrolink-web:
-    image: darmawiguna/agrolink-web:latest
-    container_name: agrolink-web
+    image: darmawiguna/agrolink-admin:latest
+    container_name: agrolink-admin
     restart: unless-stopped
     ports:
       - "3002:3000"   # Caddy reverse_proxy -> 127.0.0.1:3000
