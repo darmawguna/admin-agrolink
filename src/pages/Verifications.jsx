@@ -7,6 +7,7 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const VerificationsPage = () => {
+    // [PERBAIKAN 1] Inisialisasi state sebagai array kosong
     const [verifications, setVerifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,8 +23,9 @@ const VerificationsPage = () => {
         try {
             setLoading(true);
             const response = await getPendingVerifications();
-            setVerifications(response.data.data);
-        // eslint-disable-next-line no-unused-vars
+            // [PERBAIKAN 2] Pastikan data yang disetel selalu array, bahkan jika API mengembalikan null
+            setVerifications(response.data.data || []);
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
             setError('Gagal memuat data verifikasi.');
         } finally {
@@ -50,8 +52,6 @@ const VerificationsPage = () => {
     };
 
     const handleSubmitReview = async (values) => {
-        // values = { status: "approved" | "rejected", notes: "..." }
-
         // Validasi: Catatan wajib diisi jika ditolak
         if (values.status === 'rejected' && (!values.notes || values.notes.trim() === '')) {
             message.error('Catatan wajib diisi jika verifikasi ditolak.');
@@ -60,11 +60,12 @@ const VerificationsPage = () => {
 
         setIsSubmitting(true);
         try {
-            await reviewVerification(selectedVerification.id, values);
+            // [PERBAIKAN 3] Gunakan optional chaining untuk memastikan ID ada sebelum dipanggil
+            await reviewVerification(selectedVerification?.id, values);
             message.success('Verifikasi berhasil diproses.');
             handleCancel(); // Tutup modal
             fetchVerifications(); // Muat ulang data tabel
-        // eslint-disable-next-line no-unused-vars
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
             message.error('Gagal memproses verifikasi.');
         } finally {
@@ -76,13 +77,16 @@ const VerificationsPage = () => {
     const columns = [
         {
             title: 'Nama Pengguna',
-            dataIndex: ['User', 'Name'], // Mengambil data dari relasi User
+            dataIndex: ['User', 'Name'],
             key: 'userName',
+            // [PERBAIKAN 4] Tambahkan render function defensif
+            render: (text, record) => record.User?.Name || 'Data Hilang',
         },
         {
             title: 'Peran',
             dataIndex: ['User', 'Role'],
             key: 'userRole',
+            render: (text, record) => record.User?.Role || 'N/A',
         },
         {
             title: 'Tipe Dokumen',
@@ -124,15 +128,17 @@ const VerificationsPage = () => {
             <Title level={3} style={{ marginBottom: 24 }}>Verifikasi Dokumen</Title>
             <Table
                 columns={columns}
-                dataSource={verifications}
+                dataSource={verifications} // Ini selalu array (perbaikan 2)
                 rowKey="id"
+                loading={loading}
                 bordered
             />
 
             {/* Modal untuk Meninjau Dokumen */}
             {selectedVerification && (
                 <Modal
-                    title={`Tinjau: ${ selectedVerification.DocumentType } - ${ selectedVerification.User.Name }`}
+                    // [PERBAIKAN 5] Gunakan optional chaining di Modal Title
+                    title={`Tinjau: ${ selectedVerification.DocumentType } - ${ selectedVerification.User?.Name || 'N/A' }`}
                     open={isModalOpen}
                     onCancel={handleCancel}
                     footer={[

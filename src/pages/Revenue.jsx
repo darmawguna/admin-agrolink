@@ -33,8 +33,9 @@ const RevenuePage = () => {
             const endStr = end ? end.format('YYYY-MM-DD') : '';
 
             const response = await getRevenueAnalytics(startStr, endStr);
+            // Pastikan kita mendapatkan data.data
             setData(response.data.data);
-        // eslint-disable-next-line no-unused-vars
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
             setError('Gagal memuat data pendapatan.');
         } finally {
@@ -90,7 +91,8 @@ const RevenuePage = () => {
 
     // Konfigurasi Grafik
     const chartConfig = {
-        data: data?.daily_trend || [],
+        // [PERBAIKAN] Gunakan optional chaining di sini juga
+        data: data?.daily_trend ?? [],
         xField: 'date',
         yField: 'value',
         label: {
@@ -129,7 +131,7 @@ const RevenuePage = () => {
                         style={{ width: 250 }}
                     />
                 </Space>
-                
+
                 <Title level={3} style={{ margin: 0 }}>Analisis Pendapatan</Title>
                 <Button
                     type="primary"
@@ -178,7 +180,8 @@ const RevenuePage = () => {
 
             {/* 2. Grafik Tren */}
             <Card title="Tren Pendapatan Harian" style={{ marginTop: 24 }}>
-                {data && data.daily_trend.length > 0 ? (
+                {/* [PERBAIKAN UTAMA] Gunakan optional chaining untuk memeriksa length */}
+                {data?.daily_trend?.length > 0 ? (
                     <Column {...chartConfig} height={300} />
                 ) : (
                     <Alert message="Tidak ada data untuk periode ini." type="info" showIcon />
