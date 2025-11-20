@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Typography, Input, Select, Space, Card, Alert, Avatar } from 'antd';
-import { UserOutlined, SearchOutlined } from '@ant-design/icons';
+import { Table, Tag, Typography, Input, Select, Space, Card, Alert, Row, Col, Statistic } from 'antd';
+import { UserOutlined, SearchOutlined, TeamOutlined, ToolOutlined, CarOutlined, GlobalOutlined } from '@ant-design/icons';
 import { getAllUsers } from '../services/api';
 
 const { Title } = Typography;
@@ -16,12 +16,20 @@ const UsersPage = () => {
     const [searchText, setSearchText] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
 
+    // State untuk statistik
+    const [stats, setStats] = useState({
+        farmer: 0,
+        worker: 0,
+        driver: 0,
+        general: 0
+    });
+
     const fetchUsers = async (page, pageSize, search, role) => {
         setLoading(true);
         setError(null);
         try {
             const response = await getAllUsers(page, pageSize, search, role);
-            const result = response.data.data; // Sesuaikan dengan struktur JSON backend Anda
+            const result = response.data.data;
 
             setData(result.data);
             setPagination({
@@ -29,7 +37,11 @@ const UsersPage = () => {
                 pageSize: pageSize,
                 total: result.total_items,
             });
-        // eslint-disable-next-line no-unused-vars
+
+            // Update statistik jika tersedia dari backend
+            if (result.stats) {
+                setStats(result.stats);
+            }
         } catch (err) {
             setError('Gagal memuat data pengguna.');
         } finally {
@@ -37,12 +49,39 @@ const UsersPage = () => {
         }
     };
 
+    // Fungsi untuk fetch statistik (jika endpoint terpisah)
+    const fetchStats = async () => {
+        try {
+            // Jika backend menyediakan endpoint khusus untuk stats
+            // const response = await getUserStats();
+            // setStats(response.data.data);
+            
+            // Atau hitung dari semua data (fetch tanpa pagination)
+            const response = await getAllUsers(1, 9999, '', ''); // Ambil semua data
+            const allUsers = response.data.data.data;
+            
+            const newStats = {
+                farmer: allUsers.filter(u => u.role === 'farmer').length,
+                worker: allUsers.filter(u => u.role === 'worker').length,
+                driver: allUsers.filter(u => u.role === 'driver').length,
+                general: allUsers.filter(u => u.role === 'general').length,
+            };
+            
+            setStats(newStats);
+        } catch (err) {
+            console.error('Gagal memuat statistik:', err);
+        }
+    };
+
     // Effect untuk memuat data saat filter berubah
     useEffect(() => {
-        // Reset ke halaman 1 setiap kali filter berubah
         fetchUsers(1, pagination.pageSize, searchText, roleFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchText, roleFilter]);
+
+    // Effect untuk memuat statistik saat mount
+    useEffect(() => {
+        fetchStats();
+    }, []);
 
     // Handler ganti halaman tabel
     const handleTableChange = (newPagination) => {
@@ -54,12 +93,6 @@ const UsersPage = () => {
             title: 'Nama',
             dataIndex: 'name',
             key: 'name',
-            render: (text) => (
-                <Space>
-                    <Avatar icon={<UserOutlined />} />
-                    {text}
-                </Space>
-            ),
         },
         {
             title: 'Email',
@@ -103,47 +136,94 @@ const UsersPage = () => {
     ];
 
     return (
-        <Card>
-            <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-                <Title level={3} style={{ margin: 0 }}>Manajemen Pengguna</Title>
+        <div>
+            {/* Widget Statistik */}
+            <Row gutter={16} style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={12} md={6}>
+                    <Card>
+                        <Statistic
+                            title="Petani"
+                            value={stats.farmer}
+                            prefix={<TeamOutlined style={{ color: '#52c41a' }} />}
+                            valueStyle={{ color: '#52c41a' }}
+                        />
+                    </Card>
+                </Col>
+                <Col xs={24} sm={12} md={6}>
+                    <Card>
+                        <Statistic
+                            title="Pekerja"
+                            value={stats.worker}
+                            prefix={<ToolOutlined style={{ color: '#1890ff' }} />}
+                            valueStyle={{ color: '#1890ff' }}
+                        />
+                    </Card>
+                </Col>
+                <Col xs={24} sm={12} md={6}>
+                    <Card>
+                        <Statistic
+                            title="Driver"
+                            value={stats.driver}
+                            prefix={<CarOutlined style={{ color: '#fa8c16' }} />}
+                            valueStyle={{ color: '#fa8c16' }}
+                        />
+                    </Card>
+                </Col>
+                <Col xs={24} sm={12} md={6}>
+                    <Card>
+                        <Statistic
+                            title="Umum"
+                            value={stats.general}
+                            prefix={<GlobalOutlined style={{ color: '#8c8c8c' }} />}
+                            valueStyle={{ color: '#8c8c8c' }}
+                        />
+                    </Card>
+                </Col>
+            </Row>
 
-                <Space>
-                    {/* Filter Peran */}
-                    <Select
-                        placeholder="Filter Peran"
-                        style={{ width: 150 }}
-                        allowClear
-                        onChange={(value) => setRoleFilter(value || '')}
-                    >
-                        <Option value="farmer">Petani</Option>
-                        <Option value="worker">Pekerja</Option>
-                        <Option value="driver">Driver</Option>
-                        <Option value="general">Umum</Option>
-                    </Select>
+            {/* Tabel Pengguna */}
+            <Card>
+                <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+                    <Title level={3} style={{ margin: 0 }}>Manajemen Pengguna</Title>
 
-                    {/* Pencarian */}
-                    <Input
-                        placeholder="Cari Nama / Email"
-                        prefix={<SearchOutlined />}
-                        onChange={(e) => setSearchText(e.target.value)} // Bisa ditambahkan debounce jika perlu
-                        style={{ width: 250 }}
-                    />
-                </Space>
-            </div>
+                    <Space>
+                        {/* Filter Peran */}
+                        <Select
+                            placeholder="Filter Peran"
+                            style={{ width: 150 }}
+                            allowClear
+                            onChange={(value) => setRoleFilter(value || '')}
+                        >
+                            <Option value="farmer">Petani</Option>
+                            <Option value="worker">Pekerja</Option>
+                            <Option value="driver">Driver</Option>
+                            <Option value="general">Umum</Option>
+                        </Select>
 
-            {error && <Alert message="Error" description={error} type="error" showIcon style={{ marginBottom: 16 }} />}
+                        {/* Pencarian */}
+                        <Input
+                            placeholder="Cari Nama / Email"
+                            prefix={<SearchOutlined />}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            style={{ width: 250 }}
+                        />
+                    </Space>
+                </div>
 
-            <Table
-                columns={columns}
-                dataSource={data}
-                rowKey="id"
-                loading={loading}
-                pagination={pagination}
-                onChange={handleTableChange}
-                bordered
-                scroll={{ x: 800 }}
-            />
-        </Card>
+                {error && <Alert message="Error" description={error} type="error" showIcon style={{ marginBottom: 16 }} />}
+
+                <Table
+                    columns={columns}
+                    dataSource={data}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={pagination}
+                    onChange={handleTableChange}
+                    bordered
+                    scroll={{ x: 800 }}
+                />
+            </Card>
+        </div>
     );
 };
 

@@ -90,5 +90,14 @@ export const exportTransactions = () => {
   });
 };
 
+export const getProfitAnalytics = (startDate, endDate, sourceType = "") => {
+  const params = new URLSearchParams();
+  if (startDate) params.append("start_date", startDate);
+  if (endDate) params.append("end_date", endDate);
+  if (sourceType) params.append("source_type", sourceType);
+  
+  return api.get(`/admin/reports/profit?${params.toString()}`);
+};
+
 // Ekspor instance default
 export default api;

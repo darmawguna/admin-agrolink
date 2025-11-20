@@ -47,6 +47,9 @@ const AdminLayout = () => {
         if (path.startsWith('/revenue')) {
             return '6';
         }
+        if (path.startsWith('/profit')) {
+            return '7';
+        }
         
         return '1'; // Default ke Dashboard ('/')
     };
@@ -83,7 +86,12 @@ const AdminLayout = () => {
         {
             key: '6', // [ITEM BARU]
             icon: <BarChartOutlined />,
-            label: <Link to="/revenue">Analisis Pendapatan</Link>,
+            label: <Link to="/revenue">Analisis Transaksi</Link>,
+        },
+        {
+            key: '7', // [ITEM BARU]
+            icon: <DollarCircleOutlined />,
+            label: <Link to="/profit">Keuntungan Platform</Link>,
         },
     ];
 

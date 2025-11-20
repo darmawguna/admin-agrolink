@@ -132,7 +132,7 @@ const RevenuePage = () => {
                     />
                 </Space>
 
-                <Title level={3} style={{ margin: 0 }}>Analisis Pendapatan</Title>
+                <Title level={3} style={{ margin: 0 }}>Analisis Transaksi</Title>
                 <Button
                     type="primary"
                     icon={<DownloadOutlined />}
