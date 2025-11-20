@@ -201,13 +201,13 @@ const ProfitPage = () => {
             </Row>
 
             {/* Grafik Gateway Fee Harian */}
-            <Card title="Tren Gateway Fee Harian" style={{ marginTop: 24 }}>
+            {/* <Card title="Tren Gateway Fee Harian" style={{ marginTop: 24 }}>
                 {data?.daily_summary?.length > 0 ? (
                     <Column {...chartConfig} height={300} />
                 ) : (
                     <Alert message="Tidak ada data untuk periode ini." type="info" showIcon />
                 )}
-            </Card>
+            </Card> */}
 
             {/* Tabel Detail Harian */}
             <Card title="Detail Profit Harian" style={{ marginTop: 24 }}>
